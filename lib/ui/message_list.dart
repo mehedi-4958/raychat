@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:raychat/data/message.dart';
+import 'package:raychat/data/message_dao.dart';
+import 'package:raychat/ui/message_widget.dart';
 
 class MessageList extends StatefulWidget {
   const MessageList({Key? key}) : super(key: key);
@@ -16,7 +21,7 @@ class _MessageListState extends State<MessageList> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    // TODO: Add MessageDao
+    final messageDao = Provider.of<MessageDao>(context, listen: false);
 
     // TODO: Add UserDao
 
@@ -30,7 +35,7 @@ class _MessageListState extends State<MessageList> {
         child: Column(
           children: [
             // TODO: Add Message DAO to _getMessageList
-            _getMessageList(),
+            _getMessageList(messageDao),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -41,8 +46,7 @@ class _MessageListState extends State<MessageList> {
                       keyboardType: TextInputType.text,
                       controller: _messageController,
                       onSubmitted: (input) {
-                        // TODO: Add Message DAO 1
-                        _sendMessage();
+                        _sendMessage(messageDao);
                       },
                       decoration:
                           const InputDecoration(hintText: 'Enter new message'),
@@ -51,32 +55,65 @@ class _MessageListState extends State<MessageList> {
                 ),
                 IconButton(
                   onPressed: () {
-                    // TODO: Add Message DAO 2
-                    _sendMessage();
+                    _sendMessage(messageDao);
                   },
                   icon: Icon(_canSendMessage()
                       ? CupertinoIcons.arrow_right_circle_fill
                       : CupertinoIcons.arrow_right_circle),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  // TODO: Replace _sendMessage
-  void _sendMessage() {}
-
-// TODO: Replace _getMessageList
-  Widget _getMessageList() {
-    return const SizedBox.shrink();
+  void _sendMessage(MessageDao messageDao) {
+    if (_canSendMessage()) {
+      final message = Message(
+        text: _messageController.text, date: DateTime.now(),
+        // TODO: add email
+      );
+      messageDao.saveMessage(message);
+      _messageController.clear();
+      setState(() {});
+    }
   }
 
-  // TODO: Add _buildList
+// TODO: Replace _getMessageList
+  Widget _getMessageList(MessageDao messageDao) {
+    return Expanded(
+        child: StreamBuilder<QuerySnapshot>(
+      stream: messageDao.getMessageStream(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: LinearProgressIndicator(),
+          );
+        }
+        return _buildList(context, snapshot.data!.docs);
+      },
+    ));
+  }
 
-  // TODO: Add _buildListItem
+  Widget _buildList(BuildContext context, List<DocumentSnapshot>? snapshot) {
+    return ListView(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(top: 20.0),
+      children: snapshot!.map((data) => _buildListItem(context, data)).toList(),
+    );
+  }
+
+  Widget _buildListItem(BuildContext context, DocumentSnapshot snapshot) {
+    final message = Message.fromSnapshot(snapshot);
+    return MessageWidget(
+      message.text,
+      message.date,
+      message.email,
+    );
+  }
 
   bool _canSendMessage() => _messageController.text.isNotEmpty;
 

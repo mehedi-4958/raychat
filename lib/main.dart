@@ -1,8 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:raychat/data/message_dao.dart';
 import 'package:raychat/ui/message_list.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -12,16 +16,24 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // TODO: Add MultiProvider
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Ray Chat',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF3D814A),
+    return MultiProvider(
+      providers: [
+        // TODO: Add ChangeNotifierProvider<UserDao> here
+        Provider<MessageDao>(
+          create: (_) => MessageDao(),
+          lazy: false,
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Ray Chat',
+        theme: ThemeData(
+          primaryColor: const Color(0xFF3D814A),
+        ),
+        // TODO: Add Consumer<UserDao> here
+        home: const MessageList(),
+        // TODO: Add closing parenthesis
       ),
-      // TODO: Add Consumer<UserDao> here
-      home: const MessageList(),
-      // TODO: Add closing parenthesis
     );
   }
 }
