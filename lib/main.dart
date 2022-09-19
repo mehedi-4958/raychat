@@ -44,7 +44,6 @@ class MyApp extends StatelessWidget {
             }
           },
         ),
-        // TODO: Add closing parenthesis
       ),
     );
   }

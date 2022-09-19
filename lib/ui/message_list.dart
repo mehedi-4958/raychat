@@ -43,7 +43,6 @@ class _MessageListState extends State<MessageList> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // TODO: Add Message DAO to _getMessageList
             _getMessageList(messageDao),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,7 +90,6 @@ class _MessageListState extends State<MessageList> {
     }
   }
 
-// TODO: Replace _getMessageList
   Widget _getMessageList(MessageDao messageDao) {
     return Expanded(
         child: StreamBuilder<QuerySnapshot>(
