@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:raychat/data/message.dart';
 import 'package:raychat/data/message_dao.dart';
+import 'package:raychat/data/user_dao.dart';
 import 'package:raychat/ui/message_widget.dart';
 
 class MessageList extends StatefulWidget {
@@ -16,19 +17,27 @@ class MessageList extends StatefulWidget {
 class _MessageListState extends State<MessageList> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  // TODO: Add Email String
+  String? email;
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     final messageDao = Provider.of<MessageDao>(context, listen: false);
 
-    // TODO: Add UserDao
+    final userDao = Provider.of<UserDao>(context, listen: false);
+    email = userDao.email();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('RayChat'),
-        // TODO: Replace with actions
+        actions: [
+          IconButton(
+            onPressed: () {
+              userDao.logout();
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -72,8 +81,9 @@ class _MessageListState extends State<MessageList> {
   void _sendMessage(MessageDao messageDao) {
     if (_canSendMessage()) {
       final message = Message(
-        text: _messageController.text, date: DateTime.now(),
-        // TODO: add email
+        text: _messageController.text,
+        date: DateTime.now(),
+        email: email,
       );
       messageDao.saveMessage(message);
       _messageController.clear();

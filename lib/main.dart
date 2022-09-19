@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:raychat/data/message_dao.dart';
+import 'package:raychat/data/user_dao.dart';
+import 'package:raychat/ui/login.dart';
 import 'package:raychat/ui/message_list.dart';
 
 Future<void> main() async {
@@ -18,7 +20,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // TODO: Add ChangeNotifierProvider<UserDao> here
+        ChangeNotifierProvider<UserDao>(
+          lazy: false,
+          create: (_) => UserDao(),
+        ),
         Provider<MessageDao>(
           create: (_) => MessageDao(),
           lazy: false,
@@ -30,8 +35,15 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: const Color(0xFF3D814A),
         ),
-        // TODO: Add Consumer<UserDao> here
-        home: const MessageList(),
+        home: Consumer<UserDao>(
+          builder: (context, userDao, child) {
+            if (userDao.isLoggedIn()) {
+              return const MessageList();
+            } else {
+              return const Login();
+            }
+          },
+        ),
         // TODO: Add closing parenthesis
       ),
     );
