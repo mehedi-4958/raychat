@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:raychat/ui/message_list.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
